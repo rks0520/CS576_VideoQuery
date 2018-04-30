@@ -18,6 +18,8 @@ public class PlayWaveFile {
      */
     public static void main(String[] args) {
 
+        
+        System.out.println("test");
 	// get the command line parameters
 	if (args.length < 1) {
 	    System.err.println("usage: java -jar PlayWaveFile.jar [filename]");
