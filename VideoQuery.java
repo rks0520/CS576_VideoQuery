@@ -1,7 +1,12 @@
-
 package cs576_videoquery;
+
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * plays a wave file using PlaySound class
@@ -16,37 +21,108 @@ public class VideoQuery {
      * @param args
      *            the name of the wave file to play
      */
-    public static void main(String[] args) {
-
-        
+    
+    static final int width = 352;
+    static final int height = 288;
+    public static void main(String[] args) 
+    {
         System.out.println("test");
 	// get the command line parameters
 	if (args.length < 1) {
 	    System.err.println("usage: java -jar PlayWaveFile.jar [filename]");
 	    return;
 	}
-	String filename = args[0];
+	String folderpathforqueryvideo = args[0];
+        System.out.println("Path for the QueryVideo Folder: "+folderpathforqueryvideo);
+        File myFile = new File(folderpathforqueryvideo);
+        String queryFolder = myFile.getName();
+        System.out.println("Identified Query Folder: "+queryFolder);
+        ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
+        
+        try
+        {
+            String firstFile = getFirstFile(folderpathforqueryvideo);
+            System.out.println("Identified First Frame: "+firstFile);
+            
+            String firstFrameofQuery = folderpathforqueryvideo + "\\" + firstFile;
+            System.out.println("Identified First Frame Path: "+firstFrameofQuery);
+            
+            File firstFrameofQueryFile = new File(firstFrameofQuery);
+            InputStream is = new FileInputStream(firstFrameofQueryFile);
 
-	// opens the inputStream
-	FileInputStream inputStream;
-	try {
-	    inputStream = new FileInputStream(filename);
-	    //inputStream = this.getClass().getResourceAsStream(filename);
-	} catch (FileNotFoundException e) {
-	    e.printStackTrace();
-	    return;
-	}
+            long len = firstFrameofQueryFile.length();
+            byte[] bytes = new byte[(int)len];
+            int offset = 0;
+            int numRead = 0;
+            while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) 
+            {
+                offset += numRead;
+            }
 
-	// initializes the playSound Object
-	PlaySound playSound = new PlaySound(inputStream);
+            System.out.println("Frame Load Start:" + firstFrameofQueryFile);
+            int ind = 0;
+            BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            for (int y = 0; y < height; y++) 
+            {
+                for (int x = 0; x < width; x++) 
+                {
+                    byte r = bytes[ind];
+                    byte g = bytes[ind+height*width];
+                    byte b = bytes[ind+height*width*2]; 
+                    int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+                    image.setRGB(x,y,pix);
+                    ind++;
+                }
+            }
+            frames.add(image);
+            is.close();
+            System.out.println("Frame Load End: " + firstFrameofQueryFile);
+        } 
+        catch (FileNotFoundException e) { e.printStackTrace();}
+        catch (IOException e) { e.printStackTrace();}
+//      UserInterface userInterface = new UserInterface(frames);
+//	userInterface.showUI();
+//	
 
-	// plays the sound
-	try {
-	    playSound.play();
-	} catch (PlayWaveException e) {
-	    e.printStackTrace();
-	    return;
-	}
+
+//      opens the inputStream
+//	FileInputStream inputStream;
+//	try {
+//	    inputStream = new FileInputStream(folderpathforqueryvideo);
+//	    //inputStream = this.getClass().getResourceAsStream(filename);
+//	} catch (FileNotFoundException e) {
+//	    e.printStackTrace();
+//	    return;
+//	}
+//
+//	// initializes the playSound Object
+//	PlaySound playSound = new PlaySound(inputStream);
+//
+//	// plays the sound
+//	try {
+//	    playSound.play();
+//	} catch (PlayWaveException e) {
+//	    e.printStackTrace();
+//	    return;
+//	}
     }
 
+    //Method to get the first file of the directory for the query Video
+    public static String getFirstFile(String directory)
+    {
+        File dirName = new File(directory);
+        String[] children = dirName.list();
+        if (children == null) {return "";}
+        else 
+        {
+            int i=0;
+            String filename = children[i];
+            while (i<children.length && !filename.contains(".rgb"))
+            {
+                i++;
+                filename = children[i];
+            }
+            return filename;
+        }
+    } 
 }
