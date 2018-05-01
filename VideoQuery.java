@@ -44,7 +44,7 @@ public class VideoQuery {
             String firstFile = getFirstFile(folderpathforqueryvideo);
             System.out.println("Identified First Frame: "+firstFile);
             
-            String firstFrameofQuery = folderpathforqueryvideo + "\\" + firstFile;
+            String firstFrameofQuery = folderpathforqueryvideo + "//" + firstFile;
             System.out.println("Identified First Frame Path: "+firstFrameofQuery);
             
             File firstFrameofQueryFile = new File(firstFrameofQuery);
@@ -80,8 +80,8 @@ public class VideoQuery {
         } 
         catch (FileNotFoundException e) { e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
-//      UserInterface userInterface = new UserInterface(frames);
-//	userInterface.showUI();
+            UserInterface userInterface = new UserInterface(frames);
+            userInterface.showUI();
 //	
 
 
