@@ -28,6 +28,7 @@ public class VideoQuery {
     static String queryPath = System.getProperty("user.dir") + "/src/cs576_videoquery/query_videos/";
     
     static ArrayList<VideoDataStructure> VideoStructures = new ArrayList<VideoDataStructure>();
+    static VideoDataStructure queryVDS = new VideoDataStructure();
     
     public static void main(String[] args) 
     {
@@ -35,7 +36,7 @@ public class VideoQuery {
 	    System.err.println("usage: java -jar PlayWaveFile.jar [filename]");
 	    return;
 	}
-        
+                
 	String queryVideoPath = queryPath + args[0];
         System.out.println("Path for the QueryVideo Folder: "+ queryVideoPath);
         
@@ -86,10 +87,13 @@ public class VideoQuery {
         catch (FileNotFoundException e) { e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
         
+        loadDatabaseFiles();
+        loadQueryVideoAsVDS(args[0]);
+        
+        VideoSearch.compare(queryVDS, VideoStructures);
+        
         UserInterface userInterface = new UserInterface(frames, args[0]);
 	userInterface.showUI();
-        
-        loadDatabaseFiles();
     }
 
     //Method to get the first file of the directory for the query Video
@@ -132,19 +136,20 @@ public class VideoQuery {
                 String[] frames = databaseVideoFile.list();
 
                 VideoStructures.add(new VideoDataStructure());
+                VideoStructures.get(VideoStructures.size()-1).title = videos[i];
 
                 try {
 
                     String filename = getFirstFile(videoPath);
-                    System.out.println("Identified First Frame: "+ filename);
+                    //System.out.println("Identified First Frame: "+ filename);
                     
-                    for(int j=1; j<frames.length; j++) {
+                    for(int j=1; j<frames.length-1; j++) {
 
                         String firstFrameName = videoPath + "/" + filename;
 
                         File firstFrameFile = new File(firstFrameName);
 
-                        System.out.println("Database Loading Frame:" + fullName);
+                        //System.out.println("Database Loading Frame:" + fullName);
 
                         String fileNum = "00";
                         if(j < 100 && j > 9) {
@@ -173,10 +178,10 @@ public class VideoQuery {
 
                         for (int y = 0; y < height; y++) 
                         {
-                            for (int x = 0; x < width; x++) 
+                            for (int x = 0; x < width/5; x++) 
                             {
                                 VideoStructures.get(VideoStructures.size()-1).frames.get(j-1).addPixel(bytes[ind], bytes[ind+height*width], bytes[ind+height*width*2]);
-                                ind++;
+                                ind+=5;
                             }
                         }
 
@@ -189,5 +194,68 @@ public class VideoQuery {
 	    System.out.println("End loading database video contents.");
 	}
             
+    }
+    
+    public static void loadQueryVideoAsVDS(String video){
+            
+                String videoPath = queryPath + video + "/";
+
+                queryVDS.title = video;
+
+                try {
+
+                    String filename = getFirstFile(videoPath);
+                    
+                    for(int i=1; i <= 150; i++) {
+                        
+                        String firstFrameName = videoPath + "/" + filename;
+
+                        File firstFrameFile = new File(firstFrameName);
+
+                        //System.out.println("Database Loading Frame:" + fullName);
+
+                        String fileNum = "00";
+                        if(i < 100 && i > 9) {
+                            fileNum = "0";
+                        } else if(i > 99) {
+                            fileNum = "";
+                        }
+
+                        String fullName = queryPath + video + "/" + video +fileNum + new Integer(i).toString() + ".rgb";
+                        File file = new File(fullName);
+
+                        InputStream is = new FileInputStream(file);
+
+                        long len = firstFrameFile.length();
+                        byte[] bytes = new byte[(int)len];
+                        int offset = 0;
+                        int numRead = 0;
+                        while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) 
+                        {
+                            offset += numRead;
+                        }
+
+                        int ind = 0;
+
+                        queryVDS.addFrame();
+
+                        for (int y = 0; y < height; y++) 
+                        {
+                            for (int x = 0; x < width/5; x++) 
+                            {
+                                queryVDS.frames.get(i-1).addPixel(bytes[ind], bytes[ind+height*width], bytes[ind+height*width*2]);
+                                ind+=5;
+                            }
+                        }
+
+                        is.close();
+               
+                    }
+                }
+                
+                catch (FileNotFoundException e) { e.printStackTrace();}
+                catch (IOException e) { e.printStackTrace();}
+                
+                System.out.println("End loading query video VDS.");
     }
 }

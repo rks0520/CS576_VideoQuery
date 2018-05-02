@@ -12,8 +12,8 @@ import java.util.ArrayList;
  */
 public class VideoDataStructure {
     
-    String title;
-    ArrayList<Frame> frames;
+    public String title;
+    public ArrayList<Frame> frames;
     
     public VideoDataStructure(){
         frames = new ArrayList<Frame>();
