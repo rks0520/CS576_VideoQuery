@@ -12,22 +12,34 @@ import java.util.ArrayList;
  */
 public class VideoDataStructure {
     
-    public String title;
-    public ArrayList<Frame> frames;
+    public enum Color{RED, GREEN, BLUE};
+    public enum Type{query, DB};
+    public Color[] frameColors;
     
-    public VideoDataStructure(){
+    public String title;
+    
+    public VideoDataStructure(Type t){
+        if(t.equals(Type.DB))
+            frameColors = new Color[600];
+        else
+            frameColors = new Color[150];
+    }
+    
+    //public ArrayList<Frame> frames;
+    
+    /*public VideoDataStructure(){
         frames = new ArrayList<Frame>();
     }
     
     public void addFrame(){
         frames.add(new Frame());
-    }
+    }*/
     
     public void readInSound(){
         
     }
     
-    class Frame{
+    /*class Frame{
         ArrayList<Integer> r;
         ArrayList<Integer> g;
         ArrayList<Integer> b;
@@ -48,4 +60,5 @@ public class VideoDataStructure {
            b.add(blue);
         }
     }
+    */
 }    

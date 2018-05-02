@@ -28,7 +28,7 @@ public class VideoQuery {
     static String queryPath = System.getProperty("user.dir") + "/src/cs576_videoquery/query_videos/";
     
     static ArrayList<VideoDataStructure> VideoStructures = new ArrayList<VideoDataStructure>();
-    static VideoDataStructure queryVDS = new VideoDataStructure();
+    static VideoDataStructure queryVDS = new VideoDataStructure(VideoDataStructure.Type.query);
     
     public static void main(String[] args) 
     {
@@ -87,8 +87,11 @@ public class VideoQuery {
         catch (FileNotFoundException e) { e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
         
-        loadDatabaseFiles();
-        loadQueryVideoAsVDS(args[0]);
+        //loadDatabaseFiles();
+        //loadQueryVideoAsVDS(args[0]);
+        
+        loadDatabaseVDS();
+        loadQueryVDS(args[0]);
         
         VideoSearch.compare(queryVDS, VideoStructures);
         
@@ -115,7 +118,187 @@ public class VideoQuery {
         }
     } 
     
-    public static void loadDatabaseFiles(){
+    public static void loadDatabaseVDS(){
+        
+        File databaseVideosFile = new File(databasePath);
+        String[] videos = databaseVideosFile.list();
+        
+        
+        
+        System.out.println(databasePath);
+        System.out.println("Reading in Database Files:");
+        
+        String fullName = "";
+        
+        for(int i=0; i<videos.length; i++){
+            System.out.println(videos[i]);
+            if(!videos[i].equals(".DS_Store")){
+                String videoPath = databasePath + videos[i] + "/";
+
+                File databaseVideoFile = new File(videoPath);
+                String[] frames = databaseVideoFile.list();
+
+                VideoStructures.add(new VideoDataStructure(VideoDataStructure.Type.DB));
+                VideoStructures.get(VideoStructures.size()-1).title = videos[i];
+
+                try {
+
+                    String filename = getFirstFile(videoPath);
+                    //System.out.println("Identified First Frame: "+ filename);
+                    
+                    for(int j=1; j<=600; j++) { //iterate through frames
+
+                        String firstFrameName = videoPath + "/" + filename;
+
+                        File firstFrameFile = new File(firstFrameName);
+
+                        //System.out.println("Database Loading Frame:" + fullName);
+
+                        String fileNum = "00";
+                        if(j < 100 && j > 9) {
+                            fileNum = "0";
+                        } else if(j > 99) {
+                            fileNum = "";
+                        }
+
+                        fullName = databasePath + videos[i] + "/" + videos[i] +fileNum + new Integer(j).toString() + ".rgb";
+                        File file = new File(fullName);
+
+                        InputStream is = new FileInputStream(file);
+
+                        long len = firstFrameFile.length();
+                        byte[] bytes = new byte[(int)len];
+                        int offset = 0;
+                        int numRead = 0;
+                        while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) 
+                        {
+                            offset += numRead;
+                        }
+
+                        int ind = 0;
+                        int rCount = 0;
+                        int gCount = 0;
+                        int bCount = 0;
+
+                        for (int y = 0; y < height; y++) 
+                        {
+                            for (int x = 0; x < width; x++) 
+                            {
+                                byte r = bytes[ind];
+                                byte g = bytes[ind+height*width];
+                                byte b = bytes[ind+height*width*2];
+                                
+                                rCount += (int)r;
+                                gCount += (int)g;
+                                bCount += (int)b;
+	    			ind++;
+                            }
+                        }
+                        
+                        int dominantColor = Math.max(Math.max(rCount, gCount), bCount);
+                        
+                        if(dominantColor == rCount)
+                            VideoStructures.get(VideoStructures.size()-1).frameColors[j-1] = VideoDataStructure.Color.RED;
+                        if(dominantColor == gCount)
+                            VideoStructures.get(VideoStructures.size()-1).frameColors[j-1] = VideoDataStructure.Color.GREEN;
+                        if(dominantColor == bCount)
+                            VideoStructures.get(VideoStructures.size()-1).frameColors[j-1] = VideoDataStructure.Color.BLUE;
+                        
+
+                        is.close();
+                    }
+                }
+                catch (FileNotFoundException e) { e.printStackTrace();}
+                catch (IOException e) { e.printStackTrace();}
+            }
+	    System.out.println("End loading database video contents.");
+	}
+        
+    }
+    
+    public static void loadQueryVDS(String video){
+        
+                String videoPath = queryPath + video + "/";
+
+                queryVDS.title = video;
+
+                try {
+
+                    String filename = getFirstFile(videoPath);
+                    
+                    for(int i=1; i <= 150; i++) {
+                        
+                        String firstFrameName = videoPath + "/" + filename;
+
+                        File firstFrameFile = new File(firstFrameName);
+
+                        //System.out.println("Database Loading Frame:" + fullName);
+
+                        String fileNum = "00";
+                        if(i < 100 && i > 9) {
+                            fileNum = "0";
+                        } else if(i > 99) {
+                            fileNum = "";
+                        }
+
+                        String fullName = queryPath + video + "/" + video +fileNum + new Integer(i).toString() + ".rgb";
+                        File file = new File(fullName);
+
+                        InputStream is = new FileInputStream(file);
+
+                        long len = firstFrameFile.length();
+                        byte[] bytes = new byte[(int)len];
+                        int offset = 0;
+                        int numRead = 0;
+                        while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) 
+                        {
+                            offset += numRead;
+                        }
+
+                        int ind = 0;
+
+                        int rCount = 0;
+                        int gCount = 0;
+                        int bCount = 0;
+
+                        for (int y = 0; y < height; y++) 
+                        {
+                            for (int x = 0; x < width; x++) 
+                            {
+                                byte r = bytes[ind];
+                                byte g = bytes[ind+height*width];
+                                byte b = bytes[ind+height*width*2];
+                                
+                                rCount += (int)r;
+                                gCount += (int)g;
+                                bCount += (int)b;
+	    			ind++;
+                            }
+                        }
+                        
+                        int dominantColor = Math.max(Math.max(rCount, gCount), bCount);
+                        
+                        if(dominantColor == rCount)
+                            queryVDS.frameColors[i-1] = VideoDataStructure.Color.RED;
+                        else if(dominantColor == gCount)
+                            queryVDS.frameColors[i-1] = VideoDataStructure.Color.GREEN;
+                        else if(dominantColor == bCount)
+                            queryVDS.frameColors[i-1] = VideoDataStructure.Color.BLUE;
+
+                        is.close();
+               
+                    }
+                }
+                
+                catch (FileNotFoundException e) { e.printStackTrace();}
+                catch (IOException e) { e.printStackTrace();}
+                
+                System.out.println("End loading query video VDS.");
+        }
+        
+        
+    
+    /*public static void loadDatabaseFiles(){
         
         File databaseVideosFile = new File(databasePath);
         String[] videos = databaseVideosFile.list();
@@ -194,9 +377,9 @@ public class VideoQuery {
 	    System.out.println("End loading database video contents.");
 	}
             
-    }
+    }*/
     
-    public static void loadQueryVideoAsVDS(String video){
+    /*public static void loadQueryVideoAsVDS(String video){
             
                 String videoPath = queryPath + video + "/";
 
@@ -257,5 +440,5 @@ public class VideoQuery {
                 catch (IOException e) { e.printStackTrace();}
                 
                 System.out.println("End loading query video VDS.");
-    }
+    }*/
 }

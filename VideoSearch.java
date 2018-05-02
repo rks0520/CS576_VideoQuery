@@ -11,7 +11,11 @@ import java.util.ArrayList;
  */
 public class VideoSearch {
     
+    public enum Color {RED, GREEN, BLUE};
+    
     ArrayList<RankedVideo> RankedVideos = new ArrayList<RankedVideo>();
+
+    public ArrayList<Color> frameColors;
     
     class RankedVideo{
         VideoDataStructure video;
@@ -26,25 +30,43 @@ public class VideoSearch {
     }
     
     public static void compare(VideoDataStructure query, ArrayList<VideoDataStructure> databaseVids){
-        /*Begin Testing Stuff
-        System.out.println("Showing Full Music Video Array Values. Size:");
-        System.out.println(databaseVids.get(0).frames.size());
-        for(VideoDataStructure v : databaseVids){
-            if(v.title.equals("musicvideo")){
-                for(int i=0; i< v.frames.size(); i++){
-                    System.out.println(v.frames.get(i).r);
+        System.out.println(query.frameColors);
+        
+        for(int i = 0; i < databaseVids.size(); i++){
+            System.out.println(databaseVids.get(i).title);
+            
+            int range = databaseVids.get(i).frameColors.length - query.frameColors.length;
+ 
+            int maxSimilarity = 0;
+            int maxSimilarityIndex = 0;
+            
+            for(int j=0; j<range; j++){ //iterate through starting Windows
+                int similarityCount = 0;
+                
+                for(int k = j; (k-j)< 150; k++){ //iterate through frames
+                    
+                    if(databaseVids.get(i).frameColors[k].equals(query.frameColors[k-j]))
+                        similarityCount++;
+
+                }
+                
+                if(similarityCount > maxSimilarity){//This window is the best value so far
+                    maxSimilarity = similarityCount;
+                    maxSimilarityIndex = j;
                 }
             }
-        }
-        System.out.println();
-        System.out.println();
-        System.out.println("Showing Query Video Array Values. Size:");
-        System.out.println(query.frames.size());
-        for(int i=0; i< query.frames.size(); i++){
-            System.out.println(query.frames.get(i).r);
-        }
-        End Testing Stuff*/
+            
+            System.out.println("Similarity Percentage");
+            System.out.println(maxSimilarity/150.0);
+            System.out.println("Starting Frame");
+            System.out.println(maxSimilarityIndex);
+                
+            //RankedVideos.add(new RankedVideo(v, minError, minErrorIndex));
+            }
+    }
         
+    
+    /*public static void compare(VideoDataStructure query, ArrayList<VideoDataStructure> databaseVids){
         
         for(VideoDataStructure v : databaseVids){
             
@@ -85,6 +107,6 @@ public class VideoSearch {
             //RankedVideos.add(new RankedVideo(v, minError, minErrorIndex));
         }
 
-    }
+    }*/
     
 }
