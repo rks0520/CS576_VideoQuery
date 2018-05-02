@@ -61,7 +61,7 @@ public class UserInterface extends Frame implements ActionListener {
             JLabel imageLabel = new JLabel(CategoryLabel);
             panel.add(imageLabel);
             
-            loadButton = new Button("Load New Query Video");
+            loadButton = new Button("Load Video");
             loadButton.addActionListener(ui); 
             
             PlayButton = new Button("PLAY");
@@ -130,12 +130,13 @@ public class UserInterface extends Frame implements ActionListener {
 	errorLabel = new JLabel("");
 	errorLabel.setForeground(Color.RED);
 	    
-	//searchButton = new Button("Search");
-	// searchButton.setFont(new Font("monspaced", Font.BOLD, 60));
-	// searchButton.addActionListener(this);
-//	    queryPanel.add(errorLabel);
+        searchButton = new Button("Search");
+	searchButton.setFont(new Font("monspaced", Font.BOLD, 60));
+	searchButton.addActionListener(this);
+	queryVideo.panel.add(errorLabel);
+        
 	Panel searchPanel = new Panel();
-	   // searchPanel.add(searchButton);
+	searchPanel.add(searchButton);
 	    
         Panel controlQueryPanel = new Panel();
 	controlQueryPanel.setLayout(new GridLayout(2, 0));
@@ -143,53 +144,50 @@ public class UserInterface extends Frame implements ActionListener {
 	
         controlQueryPanel.add(searchPanel);
 	add(controlQueryPanel, BorderLayout.WEST);
-	    
-	//Result Panel
-//	Panel resultPanel = new Panel();
-//	resultListDisplay = new List(7);
-//	resultListDisplay.add("Matched Videos:    ");
-//	resultList = new ArrayList<Double>(7);
-//	    resultListRankedNames = new ArrayList<String>(7);
-//
-//	    resultPanel.add(resultListDisplay, BorderLayout.SOUTH);
-//	    loadResultButton = new Button("Load Selected Video");
-//	    loadResultButton.addActionListener(this);
-//	    resultPanel.add(loadResultButton);
-//	    add(resultPanel, BorderLayout.EAST);
+	  
+        resultVideo = new VideoObject(this, "Result:");
+
+	resultListDisplay = new List(7);
+	resultListDisplay.add("Matched Videos:    ");
+	resultList = new ArrayList<Double>(7);
+	resultListRankedNames = new ArrayList<String>(7);
+
+	resultVideo.panel.add(resultListDisplay, BorderLayout.SOUTH);
+
+	resultVideo.panel.add(resultVideo.loadButton);
+	add(resultVideo.panel, BorderLayout.EAST);
 	    
 	//Video List Panel
 	Panel listPanel = new Panel();
 	listPanel.setLayout(new GridLayout(2, 2));
         loadVideo(queryVideo, path);
-	Panel imagePanel = new Panel();
-	imagePanel.add(queryVideo.imageLabel);
-	//Panel resultImagePanel = new Panel();
-	//resultImagePanel.add(this.resultImageLabel);
-	listPanel.add(imagePanel);
-	    //listPanel.add(resultImagePanel);
+	
+        Panel queryImagePanel = new Panel();
+	queryImagePanel.add(queryVideo.imageLabel);
+	
+        Panel resultImagePanel = new Panel();
+	resultImagePanel.add(queryVideo.imageLabel);
+	
+        listPanel.add(queryImagePanel);
+        listPanel.add(resultImagePanel);
 	    
 	    //Control Panel
 	    Panel controlPanel = new Panel();
 	    Panel resultControlPanel = new Panel();
 	  
-	    //resultPlayButton = new Button("PLAY");
-	    //resultPlayButton.addActionListener(this);
 	    controlPanel.add(queryVideo.PlayButton);
-	    //resultControlPanel.add(resultPlayButton);
+	    resultControlPanel.add(resultVideo.PlayButton);
 	   
-	    //resultPauseButton = new Button("PAUSE");
-	   // resultPauseButton.addActionListener(this);
 	    controlPanel.add(queryVideo.PauseButton);
-	   // resultControlPanel.add(resultPauseButton);
+	    resultControlPanel.add(resultVideo.PauseButton);
 	   
-	    //resultStopButton = new Button("STOP");
-	   // resultStopButton.addActionListener(this);
 	    controlPanel.add(queryVideo.StopButton);
-	   // resultControlPanel.add(resultStopButton);
-	   // resultControlPanel.add(errorLabel);
+	    resultControlPanel.add(resultVideo.StopButton);
+	    resultControlPanel.add(errorLabel);
 	    
 	    listPanel.add(controlPanel);
-	   // listPanel.add(resultControlPanel);
+	    listPanel.add(resultControlPanel);
+            
 	    add(listPanel, BorderLayout.SOUTH);
 	    
 	    //searchClass = new compareAndsearch();
@@ -329,7 +327,6 @@ public class UserInterface extends Frame implements ActionListener {
 	          while (offset < bytes.length && (numRead=is.read(bytes, offset, bytes.length-offset)) >= 0) {
 	              offset += numRead;
 	          }
-	          System.out.println("Start loading frame: " + fullName);
 	    	  int index = 0;
 	          BufferedImage image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 	          for (int y = 0; y < HEIGHT; y++) {
@@ -345,7 +342,6 @@ public class UserInterface extends Frame implements ActionListener {
 	          vo.images.add(image);
 	          is.close();
 	          vo.playSound = new PlaySound(audioFilename);
-	          System.out.println("End loading query frame: " + fullName);
 	      }//end for
 	    } catch (FileNotFoundException e) {
 	      e.printStackTrace();
