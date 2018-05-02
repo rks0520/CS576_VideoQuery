@@ -41,7 +41,7 @@ public class VideoSearch {
                 for(int j=i; (j-i) < query.frames.size(); j++){   //iterate through frames
                     
                     for(int k = 0; k < query.frames.get(j-i).r.size(); k++){    //iterate through pixels
-                        
+                            
                         runningError += (v.frames.get(i).r.get(k) - query.frames.get(j-i).r.get(k)) * (v.frames.get(i).r.get(k) - query.frames.get(j-i).r.get(k));
                         runningError += (v.frames.get(i).g.get(k) - query.frames.get(j-i).g.get(k)) * (v.frames.get(i).g.get(k) - query.frames.get(j-i).g.get(k));
                         runningError += (v.frames.get(i).b.get(k) - query.frames.get(j-i).b.get(k)) * (v.frames.get(i).b.get(k) - query.frames.get(j-i).b.get(k));
