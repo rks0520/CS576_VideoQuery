@@ -224,6 +224,7 @@ public class UserInterface extends Frame implements ActionListener {
                             catch (InterruptedException e) {
                                 if(vo.playStatus == PlayStatus.STOP) {
                                     vo.currentFrameNum = 0;
+                                    vo.playSound.stop();
                                 } else {
                                     vo.currentFrameNum = i;
                                 }
@@ -239,6 +240,7 @@ public class UserInterface extends Frame implements ActionListener {
                             vo.currentFrameNum = 0;
                             System.out.println("End playing video: " + vo.filename);
                             currentThread().interrupt();
+                            vo.playSound.stop();
                         }
                     }
             };
@@ -247,7 +249,8 @@ public class UserInterface extends Frame implements ActionListener {
                 public void run() {
                     try {
                         vo.playSound.play();
-                    } catch (PlayWaveException e) {
+                    } 
+                    catch (PlayWaveException e) {
                         e.printStackTrace();
                         errorLabel.setText(e.getMessage());
                         return;
@@ -273,6 +276,7 @@ public class UserInterface extends Frame implements ActionListener {
                 vo.videoThread.interrupt();
                 vo.audioThread.interrupt();
                 vo.playSound.stop();
+                vo.currentFrameNum = 0;
                 vo.videoThread = null;
                 vo.audioThread = null;
             }
