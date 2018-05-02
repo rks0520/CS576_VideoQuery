@@ -32,19 +32,19 @@ public class VideoQuery {
 	    System.err.println("usage: java -jar PlayWaveFile.jar [filename]");
 	    return;
 	}
-	String folderpathforqueryvideo = args[0];
-        System.out.println("Path for the QueryVideo Folder: "+folderpathforqueryvideo);
-        File myFile = new File(folderpathforqueryvideo);
+	String queryVideoPath = System.getProperty("user.dir") + "/src/cs576_videoquery/query_videos/" + args[0];
+        System.out.println("Path for the QueryVideo Folder: "+ queryVideoPath);
+        File myFile = new File(queryVideoPath);
         String queryFolder = myFile.getName();
         System.out.println("Identified Query Folder: "+queryFolder);
         ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
         
         try
         {
-            String firstFile = getFirstFile(folderpathforqueryvideo);
+            String firstFile = getFirstFile(queryVideoPath);
             System.out.println("Identified First Frame: "+firstFile);
             
-            String firstFrameofQuery = folderpathforqueryvideo + "//" + firstFile;
+            String firstFrameofQuery = queryVideoPath + "//" + firstFile;
             System.out.println("Identified First Frame Path: "+firstFrameofQuery);
             
             File firstFrameofQueryFile = new File(firstFrameofQuery);
@@ -80,31 +80,9 @@ public class VideoQuery {
         } 
         catch (FileNotFoundException e) { e.printStackTrace();}
         catch (IOException e) { e.printStackTrace();}
-            UserInterface userInterface = new UserInterface(frames);
-            userInterface.showUI();
-//	
-
-
-//      opens the inputStream
-//	FileInputStream inputStream;
-//	try {
-//	    inputStream = new FileInputStream(folderpathforqueryvideo);
-//	    //inputStream = this.getClass().getResourceAsStream(filename);
-//	} catch (FileNotFoundException e) {
-//	    e.printStackTrace();
-//	    return;
-//	}
-//
-//	// initializes the playSound Object
-//	PlaySound playSound = new PlaySound(inputStream);
-//
-//	// plays the sound
-//	try {
-//	    playSound.play();
-//	} catch (PlayWaveException e) {
-//	    e.printStackTrace();
-//	    return;
-//	}
+        
+        UserInterface userInterface = new UserInterface(frames, args[0]);
+	userInterface.showUI();
     }
 
     //Method to get the first file of the directory for the query Video

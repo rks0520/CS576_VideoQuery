@@ -34,12 +34,16 @@ public class UserInterface extends Frame implements ActionListener {
     public enum PlayStatus{PLAY, PAUSE, STOP};
     
     class VideoObject{
-        PlaySound playSound;
+        
         ArrayList<BufferedImage> images;
-        PlayStatus playStatus = PlayStatus.STOP;
         Thread videoThread;
         Thread audioThread;
+        PlaySound playSound;
+        
         int currentFrameNum;
+        PlayStatus playStatus = PlayStatus.STOP;
+        
+        String filename;
         
         JLabel imageLabel;
         Button PlayButton;
@@ -49,9 +53,12 @@ public class UserInterface extends Frame implements ActionListener {
         
         Panel panel;
         
-        VideoObject(UserInterface ui){
+        /*CONSTRUCTOR*/
+        
+        VideoObject(UserInterface ui, String CategoryLabel){
             panel = new Panel();
-            JLabel imageLabel = new JLabel("Query: ");
+            
+            JLabel imageLabel = new JLabel(CategoryLabel);
             panel.add(imageLabel);
             
             loadButton = new Button("Load New Query Video");
@@ -81,8 +88,7 @@ public class UserInterface extends Frame implements ActionListener {
     
     static final int frameRate = 30;
     
-    private String fileName;
-    private String fileFolder = System.getProperty("user.dir") + "/src/cs576_videoquery/query_videos";
+    private String queryFileFolder = System.getProperty("user.dir") + "/src/cs576_videoquery/query_videos";
     private String dbFileFolder = System.getProperty("user.dir") + "/src/cs576_videoquery/database_videos";
     
     static final int WIDTH = 352;
@@ -112,9 +118,9 @@ public class UserInterface extends Frame implements ActionListener {
 
 //FUNCTIONS
     
-    public UserInterface(ArrayList<BufferedImage> imgs) {
+    public UserInterface(ArrayList<BufferedImage> imgs, String path) {
 	
-        queryVideo = new VideoObject(this);
+        queryVideo = new VideoObject(this, "Query:");
         queryVideo.setImages(imgs);
         
 	queryField = new TextField(13);
@@ -154,9 +160,9 @@ public class UserInterface extends Frame implements ActionListener {
 	//Video List Panel
 	Panel listPanel = new Panel();
 	listPanel.setLayout(new GridLayout(2, 2));
-            
+        loadVideo(queryVideo, path);
 	Panel imagePanel = new Panel();
-	imagePanel.add(this.queryVideo.imageLabel);
+	imagePanel.add(queryVideo.imageLabel);
 	//Panel resultImagePanel = new Panel();
 	//resultImagePanel.add(this.resultImageLabel);
 	listPanel.add(imagePanel);
@@ -206,35 +212,35 @@ public class UserInterface extends Frame implements ActionListener {
 	}
 	
         private void playVideo(VideoObject vo){
-            vo.videoThread = new Thread() {
-                public void run() {
-                    System.out.println("Start playing video: " + fileName);
-	          	
-                    for (int i = vo.currentFrameNum; i < vo.images.size(); i++) {
-                        vo.imageLabel.setIcon(new ImageIcon(vo.images.get(i)));
-                        try {
-                            sleep(1000/frameRate);
-                        } 
-                        catch (InterruptedException e) {
-                            if(vo.playStatus == PlayStatus.STOP) {
-                                vo.currentFrameNum = 0;
-                            } else {
-                                vo.currentFrameNum = i;
+                vo.videoThread = new Thread() {
+                    public void run() {
+                        System.out.println("Start playing video: " + vo.filename);
+
+                        for (int i = vo.currentFrameNum; i < vo.images.size(); i++) {
+                            vo.imageLabel.setIcon(new ImageIcon(vo.images.get(i)));
+                            try {
+                                sleep(1000/frameRate);
+                            } 
+                            catch (InterruptedException e) {
+                                if(vo.playStatus == PlayStatus.STOP) {
+                                    vo.currentFrameNum = 0;
+                                } else {
+                                    vo.currentFrameNum = i;
+                                }
+
+                                vo.imageLabel.setIcon(new ImageIcon(vo.images.get(vo.currentFrameNum)));
+                                currentThread().interrupt();
+
+                                break;
                             }
-                                
-                        vo.imageLabel.setIcon(new ImageIcon(vo.images.get(vo.currentFrameNum)));
-                        currentThread().interrupt();
-                            break;
+                        }
+                        if(vo.playStatus != PlayStatus.STOP && vo.playStatus ==PlayStatus.PLAY) {
+                            vo.playStatus = PlayStatus.STOP;
+                            vo.currentFrameNum = 0;
+                            System.out.println("End playing video: " + vo.filename);
+                            currentThread().interrupt();
                         }
                     }
-                    if(vo.playStatus != PlayStatus.STOP) {
-                        vo.playStatus = PlayStatus.STOP;
-		        vo.currentFrameNum = 0;
-                    }
-                        
-                    System.out.println("End playing video: " + fileName);
-                    
-                }
             };
                 
             vo.audioThread = new Thread() {
@@ -258,8 +264,6 @@ public class UserInterface extends Frame implements ActionListener {
 			vo.videoThread.interrupt();
 			vo.audioThread.interrupt();
 			vo.playSound.pause();
-			vo.videoThread = null;
-			vo.audioThread = null;
 		}
 	}
 	
@@ -293,7 +297,7 @@ public class UserInterface extends Frame implements ActionListener {
 	
 	private void loadVideo(VideoObject vo, String userInput) {
             System.out.println("Start loading query video contents.");
-               
+            vo.filename = userInput;
                 
 	    try {
 	      if(userInput == null || userInput.isEmpty()){
@@ -308,8 +312,8 @@ public class UserInterface extends Frame implements ActionListener {
 	    	  } else if(i > 99) {
 	    		  fileNum = "";
 	    	  }
-	    	  String fullName = fileFolder + "/" + userInput + "/" + userInput +fileNum + new Integer(i).toString() + ".rgb";
-	    	  String audioFilename = fileFolder + "/" + userInput + "/" + userInput + ".wav";
+	    	  String fullName = queryFileFolder + "/" + userInput + "/" + userInput +fileNum + new Integer(i).toString() + ".rgb";
+	    	  String audioFilename = queryFileFolder + "/" + userInput + "/" + userInput + ".wav";
 	    	  
 	    	  File file = new File(fullName);
 	    	  InputStream is = new FileInputStream(file);
@@ -348,6 +352,8 @@ public class UserInterface extends Frame implements ActionListener {
 	    }
 	    vo.playStatus = PlayStatus.STOP;
 	    vo.currentFrameNum = 0;
+            
+            
 	    System.out.println("End loading query video contents.");
 	}
 	
@@ -413,9 +419,9 @@ public class UserInterface extends Frame implements ActionListener {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) { 
-		if(e.getSource() == this.queryVideo.PlayButton /*|| e.getSource() == this.resultVideo.PlayButton*/) {
+		if(e.getSource() == queryVideo.PlayButton /*|| e.getSource() == this.resultVideo.PlayButton*/) {
                         VideoObject vo;
-                        if(e.getSource() == this.queryVideo.PlayButton)
+                        if(e.getSource() == queryVideo.PlayButton)
                             vo = queryVideo;
                         else
                             vo = resultVideo;
@@ -429,7 +435,7 @@ public class UserInterface extends Frame implements ActionListener {
                 
                 else if(e.getSource() == queryVideo.PauseButton /*|| e.getSource() == resultVideo.PauseButton*/) {
                         VideoObject vo;
-                        if(e.getSource() == this.queryVideo.PauseButton)
+                        if(e.getSource() == queryVideo.PauseButton)
                             vo = queryVideo;
                         else
                             vo = resultVideo;
@@ -449,7 +455,7 @@ public class UserInterface extends Frame implements ActionListener {
                 
                 else if(e.getSource() == queryVideo.StopButton /*|| e.getSource() == resultVideo.StopButton*/) {
 			VideoObject vo;
-                        if(e.getSource() == this.queryVideo.PauseButton)
+                        if(e.getSource() == queryVideo.StopButton)
                             vo = queryVideo;
                         else
                             vo = resultVideo;
@@ -463,7 +469,7 @@ public class UserInterface extends Frame implements ActionListener {
 		
                 else if(e.getSource() == queryVideo.loadButton /*|| e.getSource() == this.resultVideo.loadButton*/) {
                         VideoObject vo;
-                        if(e.getSource() == this.queryVideo.loadButton){
+                        if(e.getSource() == queryVideo.loadButton){
                             vo = queryVideo;
                             String userInput = queryField.getText();
                             if(userInput != null && !userInput.isEmpty()) {
