@@ -26,6 +26,25 @@ public class VideoSearch {
     }
     
     public static void compare(VideoDataStructure query, ArrayList<VideoDataStructure> databaseVids){
+        /*Begin Testing Stuff
+        System.out.println("Showing Full Music Video Array Values. Size:");
+        System.out.println(databaseVids.get(0).frames.size());
+        for(VideoDataStructure v : databaseVids){
+            if(v.title.equals("musicvideo")){
+                for(int i=0; i< v.frames.size(); i++){
+                    System.out.println(v.frames.get(i).r);
+                }
+            }
+        }
+        System.out.println();
+        System.out.println();
+        System.out.println("Showing Query Video Array Values. Size:");
+        System.out.println(query.frames.size());
+        for(int i=0; i< query.frames.size(); i++){
+            System.out.println(query.frames.get(i).r);
+        }
+        End Testing Stuff*/
+        
         
         for(VideoDataStructure v : databaseVids){
             
@@ -65,6 +84,7 @@ public class VideoSearch {
             
             //RankedVideos.add(new RankedVideo(v, minError, minErrorIndex));
         }
+
     }
     
 }
